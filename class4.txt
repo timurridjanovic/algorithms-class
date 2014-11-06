@@ -1,0 +1,612 @@
+1.
+IMPORTANCE RANK
+
+
+#            animal       speed   weight lifespan brain
+#                          (mph)   (kg)  (years) mass (g)
+animals = [("dog",          46,   35,     13,  280    ),
+           ("elephant",     30, 3500,     50, 6250    ),
+           ("frog",          5,    0.5,    8,    3    ),
+           ("hippopotamus", 45, 1600,     45,  573    ),
+           ("horse",        40,  385,     30, 642     ),
+           ("human",        27,   80,     78, 2000    ),
+           ("lion",         50,  250,     30,  454    ),
+           ("mouse",         8,    0.025,  2,    0.625),
+           ("rabbit",       25,    4,     12,   40    ), 
+           ("shark",        26,  230,     20,   92    ),
+           ("sparrow",      16,    0.024,  7,    2    )]
+
+def importance_rank(items, weights):
+    names = [item[0] for item in items]
+    scores = [sum([a*b for (a,b) in zip(item[1:], weights)]) for item in items]
+    results = zip(scores,names)
+    res2 = sorted(results)
+    return res2
+
+answer = importance_rank(animals, (2,3,7,1))
+
+for i in range(len(answer)):
+    print i, answer[i][1], "(", answer[i][0], ")"
+    
+
+
+
+
+
+
+SOCIAL NETWORK ANALYSIS
+
+-betweenness centrality (a node is central if most of the shortest paths between arbitrarly chosen pairs in the network end up having to pass through the node)
+
+-closeness centrality (a given node is central if it has short paths to other nodes in the network)
+
+-eigenvector centrality (Eigenvector centrality is a measure of the influence of a node in a network. It assigns relative scores to all nodes in the network based on the concept that connections to high-scoring nodes contribute more to the score of the node in question than equal connections to low-scoring nodes. Google's PageRank is a variant of the Eigenvector centrality measure.[17] Another closely related centrality measure is Katz centrality.)
+
+-node centrality (just has a lot of edges, well connected) (or degree centrality?)
+
+
+
+SOME STATISTICS (given list L):
+    -maximum value in L
+    -minimum value in L
+    -midpoint (average of max and min)
+    -mean (average of values in L)
+    -mode: most common value in L
+    -median: "middlest" value in L (half bigger, half smaller)
+    
+if L is sorted:
+
+minimum: L[0]
+max: L[-1]
+midpoint: (L[0]+L[-1])/2
+median : L[n/2]
+
+
+
+
+
+
+
+
+
+
+
+8.
+#
+# Write partition to return a new array with 
+# all values less then `v` to the left 
+# and all values greater then `v` to the right
+#
+
+def partition(L, v):
+    P = [v]
+    for e in L:
+        if e<v:
+            P.insert(0, e)
+        else:
+            P.append(e)
+    return P
+
+
+
+print partition([8, 3, 5, 1, 9, 4, 1], 5)
+
+
+
+
+
+USING PARTITION (changed a bit) FUNCTION TO GET AN UNORDERED TOP K in Big Theta of N (4N)
+
+
+import random
+
+L = [31, 45, 91, 51, 66, 82, 28, 33, 11, 89, 84, 27, 36]
+
+def partition(L, v):
+    smaller= []
+    bigger = []
+    for val in L:
+        if val < v: smaller += [val]
+        if val > v: bigger += [val]
+    return (smaller, [v], bigger)
+    
+    
+def top_k(L, k):
+    v = L[random.randrange(len(L))]
+    (left, middle, right) = partition(L, v)
+    if len(left) == k: return left
+    if lef(left)+1 == k: return left+[v]
+    if len(left) > k: return top_k(left, k)
+    return left+[v]+top_k(right, k-len(left)-1)
+    
+print top_k(L, 5)
+
+
+
+
+
+
+
+
+
+SUMMARY OF TOP K
+
+sort: nlogn
+selection/insertion: n*k
+partition: n (little practical use though)
+selection/insertion with heap instead of list: n*logk
+
+
+
+
+
+
+
+
+
+
+
+HEAPS
+-insert
+-find min
+-remove min
+
+
+16.
+#
+# Implement remove_min
+#
+
+def remove_min(L):
+    L[0] = L.pop()
+    down_heapify(L, 0)
+    return L
+
+def parent(i): 
+    return (i-1)/2
+def left_child(i): 
+    return 2*i+1
+def right_child(i): 
+    return 2*i+2
+def is_leaf(L,i): 
+    return (left_child(i) >= len(L)) and (right_child(i) >= len(L))
+def one_child(L,i): 
+    return (left_child(i) < len(L)) and (right_child(i) >= len(L))
+
+# Call this routine if the heap rooted at i satisfies the heap property
+# *except* perhaps i to its immediate children
+def down_heapify(L, i):
+    # If i is a leaf, heap property holds
+    if is_leaf(L, i): 
+        return
+    # If i has one child...
+    if one_child(L, i):
+        # check heap property
+        if L[i] > L[left_child(i)]:
+            # If it fails, swap, fixing i and its child (a leaf)
+            (L[i], L[left_child(i)]) = (L[left_child(i)], L[i])
+        return
+    # If i has two children...
+    # check heap property
+    if min(L[left_child(i)], L[right_child(i)]) >= L[i]: 
+        return
+    # If it fails, see which child is the smaller
+    # and swap i's value into that child
+    # Afterwards, recurse into that child, which might violate
+    if L[left_child(i)] < L[right_child(i)]:
+        # Swap into left child
+        (L[i], L[left_child(i)]) = (L[left_child(i)], L[i])
+        down_heapify(L, left_child(i))
+        return
+    else:
+        (L[i], L[right_child(i)]) = (L[right_child(i)], L[i])
+        down_heapify(L, right_child(i))
+        return
+
+#########
+# Testing Code
+#
+
+# build_heap
+def build_heap(L):
+    for i in range(len(L)-1, -1, -1):
+        down_heapify(L, i)
+    return L
+
+def test():
+    L = range(10)
+    build_heap(L)
+    remove_min(L)
+    # now, the new minimum should be 1
+    print L
+    assert L[0] == 1
+test() 
+    
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+INSERT IN A HEAP
+
+
+def insert_heap(L, v):
+    L.append(v)
+    up_heapify(L, len(L)-1)
+    
+NLOGN complexity
+
+
+
+
+
+
+HOMEWORK
+
+#2
+
+#
+# Given a list of numbers, L, find a number, x, that
+# minimizes the sum of the absolute value of the difference
+# between each element in L and x: SUM_{i=0}^{n-1} |L[i] - x|
+# 
+# Your code should run in Theta(n) time
+#
+
+def minimize_absolute(L):
+    results = []
+    for x in L:
+        sumL = (sum([abs(e-x) for e in L]), x)
+        results.append(sumL)
+    return min(results, key=lambda x: x[0])[1]
+
+
+
+L = [45, 9, 12, 78, 12, 3, 21, 0]
+print minimize_absolute(L)
+
+
+
+
+
+
+
+OR
+
+
+
+
+
+
+#
+# Given a list of numbers, L, find a number, x, that
+# minimizes the sum of the absolute value of the difference
+# between each element in L and x: SUM_{i=0}^{n-1} |L[i] - x|
+# 
+# Your code should run in Theta(n) time
+#
+
+def minimize_absolute(L):
+    minValue = None
+    xValue = 0
+    results = []
+    for x in L:
+        sumL = (sum([abs(e-x) for e in L]), x)
+        if minValue == None or sumL < minValue:
+            minValue = sumL
+            xValue = x
+    return xValue
+
+
+
+L = [45, 9, 12, 78, 12, 3, 21, 0]
+print minimize_absolute(L)
+
+
+
+
+
+
+BEST VERSION
+
+
+
+
+#
+# Given a list of numbers, L, find a number, x, that
+# minimizes the sum of the absolute value of the difference
+# between each element in L and x: SUM_{i=0}^{n-1} |L[i] - x|
+# 
+# Your code should run in Theta(n) time
+#
+def median(l): 
+    l = sorted(l) 
+    n = len(l)/2 
+    if len(l) % 2 == 0: 
+        return (l[n]+l[n-1])/2 
+    else: 
+        return l[n]
+
+def minimize_absolute(L):
+    xValue = median(L)
+    return xValue
+
+
+L = [45, 9, 12, 78, 99, 3, 21, 0]
+print minimize_absolute(L)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#3
+
+
+
+#
+# Given a list of numbers, L, find a number, x, that
+# minimizes the sum of the square of the difference
+# between each element in L and x: SUM_{i=0}^{n-1} (L[i] - x)^2
+# 
+# Your code should run in Theta(n) time
+# 
+import math
+
+def mean(L):
+    mean = sum(L)/float(len(L))
+    return mean
+    
+    
+def minimize_square(L):
+    x = mean(L)
+    return x
+    
+    
+L = [2, 2, 3, 4]
+print minimize_square(L)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#4
+
+
+
+#
+# Given a list L of n numbers, find the mode 
+# (the number that appears the most times).  
+# Your algorithm should run in Theta(n).
+# If there are ties - just pick one value to return 
+#
+from operator import itemgetter
+
+def mode(L):
+    count = {}
+    maxValue = 0
+    maxElement = None
+    for e in L:
+        if count.get(e):
+            count[e] += 1
+        else:
+            count[e] = 1
+        if count[e] > maxValue:
+                maxValue = count[e]
+                maxElement = e
+    return maxElement
+
+#print mode([1, 2, 3, 3, 4, 4, 5, 6, 4])
+    
+
+####
+# Test
+#
+import time
+from random import randint
+
+def test():
+    assert 5 == mode([1, 5, 2, 5, 3, 5])
+    iterations = (10, 20, 30, 100, 200, 300, 1000, 5000, 10000, 20000, 30000)
+    times = []
+    for i in iterations:
+        L = []
+        for j in range(i):
+            L.append(randint(1, 10))
+        start = time.clock()
+        for j in range(500):
+            mode(L)
+        end = time.clock()
+        print start, end
+        times.append(float(end - start))
+    slopes = []
+    for (x1, x2), (y1, y2) in zip(zip(iterations[:-1], iterations[1:]), zip(times[:-1], times[1:])):
+        print (x1, x2), (y1, y2)
+        slopes.append((y2 - y1) / (x2 - x1))
+    # if mode runs in linear time, 
+    # these factors should be close (kind of)
+    print slopes
+
+test()
+
+
+
+
+
+
+OR
+
+
+
+def mode(L):
+    return max(set(L), key = lambda x: L.count(x))
+
+
+
+
+#5
+
+#
+# write up_heapify, an algorithm that checks if
+# node i and its parent satisfy the heap
+# property, swapping and recursing if they don't
+#
+# L should be a heap when up_heapify is done
+#
+
+def parent(i): 
+    return (i-1)/2
+def left_child(i): 
+    return 2*i+1
+def right_child(i): 
+    return 2*i+2
+def is_leaf(L,i): 
+    return (left_child(i) >= len(L)) and (right_child(i) >= len(L))
+def one_child(L,i): 
+    return (left_child(i) < len(L)) and (right_child(i) >= len(L))
+
+def up_heapify(L, i):
+    if parent(i) >= 0:
+        if L[parent(i)] > L[i]:
+            L[parent(i)], L[i] = L[i], L[parent(i)]
+            up_heapify(L, parent(i))
+        else:
+            return
+    return L
+
+
+def test():
+    L = [2, 4, 3, 5, 9, 7, 7]
+    L.append(1)
+    up_heapify(L, 7)
+    assert 1 == L[0]
+    assert 2 == L[1]
+
+test()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#6
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

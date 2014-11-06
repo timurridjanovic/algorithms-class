@@ -1,0 +1,30 @@
+LESSON 5: Strong and Weak Bonds
+
+
+MATRIX MULTIPLICATION
+
+
+WEIGHTED SOCIAL NETWORKS
+
+link between i and j
+-how often they email each other
+-how long they've known each other
+-frequency of meetings
+-how often they rate each other's posts
+-# news articles both have read
+
+
+SHORTEST PATH: DIJKSTRA
+
+make dijkstra faster with heaps, and even faster with fibonacci heap
+
+
+
+FLOYD-WARSHALL SHORTEST PATH
+
+
+CLUSTERING COEFFICIENT
+
+randomized algorithm
+
+
